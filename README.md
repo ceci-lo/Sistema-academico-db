@@ -11,8 +11,19 @@ Una facultad necesita gestionar la información de sus alumnos, docentes, materi
 - Asignación de cargos a docentes
 
 
-### Entidades Principales:
+### Esquema relacional:
 
+PERSONA(id_persona, dni, nombre, apellido, fecha_nacimiento, lugar_nacimiento)  
+ALUMNO(id_persona, nro_legajo)  
+DOCENTE(id_persona, id_cargo)  
+CARGO(id_cargo, nombre_cargo)  
+MATERIA(id_materia, nombre_materia)  
+CARRERA(id_carrera, nombre_carrera)  
+
+Relaciones:
+CURSA(id_persona, id_materia)
+RINDE(id_persona, id_materia, nota_final)
+DICTA(id_persona, id_materia, hora_clase)
 
 ##  Diagrama Entidad-Relación
 
