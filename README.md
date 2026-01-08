@@ -27,7 +27,7 @@ DICTA(id_persona, id_materia, hora_clase)
 
 ##  Diagrama Entidad-Relación
 
-![Diagrama ER](diagrams/diagrama-er.png)
+![Diagrama ER](Diagrams/Sistema-Academico.png)
 
 ##  Estructura del Proyecto
 
