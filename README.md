@@ -43,10 +43,10 @@ DICTA(id_persona, id_materia, hora_clase)
 ##  Estado del Proyecto
 
 - [x] Diagrama Entidad-Relación
-- [ ] Modelo Relacional
-- [ ] Scripts de creación de tablas
-- [ ] Datos de prueba
-- [ ] Consultas SQL de ejemplo
+- [x] Modelo Relacional
+- [x] Scripts de creación de tablas
+- [x] Datos de prueba
+- [x] Consultas SQL de ejemplo
 
 ## Tecnologías
 
