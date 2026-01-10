@@ -1,160 +1,246 @@
+-- =============================================
+-- Eliminar BD si existe
+-- =============================================
+DROP DATABASE IF EXISTS SistemaAcademico;
+CREATE DATABASE SistemaAcademico;
+USE SistemaAcademico;
+
+-- =============================================
+-- TABLA: Persona
+-- =============================================
+CREATE TABLE Persona (
+  ID_Persona INT NOT NULL AUTO_INCREMENT,
+  DNI INT NOT NULL,
+  Apellido VARCHAR(100) NOT NULL,
+  Nombre VARCHAR(50) NOT NULL,
+  Fecha_Nacimiento DATE NOT NULL,
+  Lugar_Nacimiento VARCHAR(200) NULL,
+  PRIMARY KEY (ID_Persona),
+  UNIQUE KEY UK_DNI (DNI)
+) ENGINE=InnoDB;
+
+-- =============================================
+-- TABLA: Alumno
+-- =============================================
+CREATE TABLE Alumno (
+  ID_Persona INT NOT NULL,
+  Nro_Legajo VARCHAR(20) NOT NULL,
+  PRIMARY KEY (ID_Persona),
+  UNIQUE KEY UK_Nro_Legajo (Nro_Legajo),
+  CONSTRAINT FK_Alumno_Persona 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Persona(ID_Persona)
+    ON DELETE CASCADE 
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- TABLA: Docentes
+-- =============================================
+CREATE TABLE Docentes (
+  ID_Persona INT NOT NULL,
+  PRIMARY KEY (ID_Persona),
+  CONSTRAINT FK_Docentes_Persona 
+    FOREIGN KEY (ID_Persona)
+    REFERENCES Persona(ID_Persona)
+	ON DELETE CASCADE 
+    ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- TABLA: Cargo
+-- =============================================
+CREATE TABLE Cargo (
+  ID_Cargo INT NOT NULL AUTO_INCREMENT,
+  Nombre_Cargo VARCHAR(100) NOT NULL,
+  PRIMARY KEY (ID_Cargo),
+  UNIQUE KEY UK_Nombre_Cargo (Nombre_Cargo)
+) ENGINE=InnoDB;
+
+-- =============================================
+-- TABLA: Carreras
+-- =============================================
+CREATE TABLE Carreras (
+  ID_Carrera INT NOT NULL AUTO_INCREMENT,
+  Nombre_Carrera VARCHAR(200) NOT NULL,
+  Fecha_Inicio DATE NULL,
+  PRIMARY KEY (ID_Carrera)
+) ENGINE=InnoDB;
+
+-- =============================================
+-- TABLA: Materias
+-- =============================================
+CREATE TABLE Materias (
+  ID_Materia INT NOT NULL AUTO_INCREMENT,
+  Nombre_Materia VARCHAR(200) NOT NULL,
+  PRIMARY KEY (ID_Materia)
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Docentes_Cargo (1:N)
+-- =============================================
+CREATE TABLE Docentes_Cargo (
+  ID_Persona INT NOT NULL,
+  ID_Cargo INT NOT NULL,
+  Fecha_Asignacion DATE NULL,
+  PRIMARY KEY (ID_Persona, ID_Cargo),
+  KEY FK_Cargo (ID_Cargo),
+  CONSTRAINT FK_DocentesCargo_Docentes 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Docentes(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_DocentesCargo_Cargo 
+    FOREIGN KEY (ID_Cargo) 
+    REFERENCES Cargo(ID_Cargo)
+    ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Alumno_Cursa_Materias (N:M)
+-- =============================================
+CREATE TABLE Alumno_Cursa_Materias (
+  ID_Persona INT NOT NULL,
+  ID_Materia INT NOT NULL,
+  Anio INT NOT NULL,
+  Cuatrimestre INT NOT NULL,
+  PRIMARY KEY (ID_Persona, ID_Materia, Anio, Cuatrimestre),
+  KEY FK_Cursa_Materia (ID_Materia),
+  CONSTRAINT FK_Cursa_Alumno 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Alumno(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Cursa_Materias 
+    FOREIGN KEY (ID_Materia) 
+    REFERENCES Materias(ID_Materia)
+    ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Alumno_Rinde_Materias (N:M)
+-- =============================================
+CREATE TABLE Alumno_Rinde_Materias (
+  ID_Examen INT NOT NULL AUTO_INCREMENT,
+  ID_Persona INT NOT NULL,
+  ID_Materia INT NOT NULL,
+  Fecha_Examen DATE NOT NULL,
+  Nota_Final DECIMAL(4,2) NULL,
+  PRIMARY KEY (ID_Examen),
+  KEY FK_Rinde_Alumno (ID_Persona),
+  KEY FK_Rinde_Materia (ID_Materia),
+  CONSTRAINT FK_Rinde_Alumno 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Alumno(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Rinde_Materias 
+    FOREIGN KEY (ID_Materia) 
+    REFERENCES Materias(ID_Materia)
+    ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Docentes_Dicta_Materias (N:M)
+-- =============================================
+CREATE TABLE Docentes_Dicta_Materias (
+  ID_Persona INT NOT NULL,
+  ID_Materia INT NOT NULL,
+  Hora_Clase VARCHAR(50) NULL,
+  PRIMARY KEY (ID_Persona, ID_Materia),
+  KEY FK_Dicta_Materia (ID_Materia),
+  CONSTRAINT FK_Dicta_Docentes 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Docentes(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Dicta_Materias 
+    FOREIGN KEY (ID_Materia) 
+    REFERENCES Materias(ID_Materia)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Docentes_Titular_Materias (1:1)
+-- =============================================
+CREATE TABLE Docentes_Titular_Materias (
+  ID_Persona INT NOT NULL,
+  ID_Materia INT NOT NULL,
+  Fecha_Desde DATE NULL,
+  PRIMARY KEY (ID_Persona, ID_Materia),
+  UNIQUE KEY UK_Materia_Titular (ID_Materia),
+  CONSTRAINT FK_Titular_Docentes 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Docentes(ID_Persona)
+    ON DELETE RESTRICT,
+  CONSTRAINT FK_Titular_Materias 
+    FOREIGN KEY (ID_Materia) 
+    REFERENCES Materias(ID_Materia)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Alumno_Inscribe_Carreras (N:M)
+-- =============================================
+CREATE TABLE Alumno_Inscribe_Carreras (
+  ID_Persona INT NOT NULL,
+  ID_Carrera INT NOT NULL,
+  Fecha_Inscripcion DATE NULL,
+  Estado ENUM('Activo','Inactivo','Graduado') DEFAULT 'Activo',
+  PRIMARY KEY (ID_Persona, ID_Carrera),
+  KEY FK_Inscribe_Carrera (ID_Carrera),
+  CONSTRAINT FK_Inscribe_Alumno 
+    FOREIGN KEY (ID_Persona) 
+    REFERENCES Alumno(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Inscribe_Carreras 
+    FOREIGN KEY (ID_Carrera) 
+    REFERENCES Carreras(ID_Carrera)
+    ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Materias_Pertenece_Carreras (N:M)
+-- =============================================
+CREATE TABLE Materias_Pertenece_Carreras (
+  ID_Materia INT NOT NULL,
+  ID_Carrera INT NOT NULL,
+  Fecha_Inicio DATE NULL,
+  Fecha_Fin DATE NULL,
+  PRIMARY KEY (ID_Materia, ID_Carrera),
+  KEY FK_Pertenece_Carrera (ID_Carrera),
+  CONSTRAINT FK_Pertenece_Materias 
+    FOREIGN KEY (ID_Materia) 
+    REFERENCES Materias(ID_Materia)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Pertenece_Carreras 
+    FOREIGN KEY (ID_Carrera) 
+    REFERENCES Carreras(ID_Carrera)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- RELACIÓN: Tutoria (Auto-relación 1:1)
+-- =============================================
+CREATE TABLE Tutoria (
+  ID_Tutor INT NOT NULL,
+  ID_Tutorado INT NOT NULL,
+  Fecha_Inicio DATE NULL,
+  PRIMARY KEY (ID_Tutor, ID_Tutorado),
+  UNIQUE KEY UK_Tutorado (ID_Tutorado),
+  KEY FK_Tutoria_Tutorado (ID_Tutorado),
+  CONSTRAINT FK_Tutoria_Tutor 
+    FOREIGN KEY (ID_Tutor) 
+    REFERENCES Alumno(ID_Persona)
+    ON DELETE CASCADE,
+  CONSTRAINT FK_Tutoria_Tutorado 
+    FOREIGN KEY (ID_Tutorado) 
+    REFERENCES Alumno(ID_Persona)
+    ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =============================================
+-- Verificación
+-- =============================================
+SELECT 'Base de datos creada exitosamente!' AS Resultado;
+SHOW TABLES;
+
 -- INSERT INTO table_name (column1, column2, column3, ...)
 -- VALUES (value1, value2, value3, ...);
-
--- Inserta datos en la tabla persona
-INSERT INTO persona (DNI, Apellido, Nombre, Fecha_Nacimiento, Lugar_Nacimiento)
-VALUES (1234565, 'Lopez','Ana','2001-04-12','Argentina'),
-		(32783653,'García', 'Juan', '1995-11-23', 'Argentina'),
-		(4783562,'Martínez', 'Elena', '1988-07-30', 'Argentina'),
-		(543357,'Rodríguez', 'Luis', '2005-01-15', 'Argentina');
- 
- -- Inserta datos en tabla alumnos    
-INSERT INTO alumno (ID_Persona, Nro_Legajo)
-Values (1, 1),(2, 2),(3, 3);
-
- -- Inserta datos en tabla docentes
-INSERT INTO docentes (Id_Persona)
-Values (4);
-
- -- Inserta datos en tabla carrera
-INSERT INTO carreras (Nombre_Carrera, Fecha_inicio)
-Values ('ing. Sistemas', '2026-03-04'),
- ('ing. Electrica', '2026-03-04'),
- ('ing. Civil', '2026-03-04'),
- ('ing. Materiales', '2026-03-04'); -- Materias
-INSERT INTO materias (Nombre_Materia)
-VALUES 
-    ('Algoritmos y Estructuras de Datos'),
-    ('Base de Datos'),
-    ('Sistemas Operativos'),
-    ('Matemática I'),
-    ('Física I');
-
--- Cargos
-INSERT INTO cargo (Nombre_Cargo)
-VALUES 
-    ('Profesor Titular'),
-    ('Profesor Adjunto'),
-    ('Ayudante de Primera'),
-    ('JTP');
-
--- Asignar cargo al docente
-INSERT INTO docentes_cargo (ID_Persona, ID_Cargo, Fecha_Asignacion)
-VALUES (4, 1, '2024-03-01');
-
--- Inscribir alumnos en carreras
-INSERT INTO alumno_inscribe_carreras (ID_Persona, ID_Carrera, Fecha_Inscripcion, Estado)
-VALUES 
-    (1, 1, '2024-03-04', 'Activo'),
-    (2, 1, '2024-03-04', 'Activo'),
-    (3, 2, '2024-03-04', 'Activo');
-
--- Relacionar materias con carreras
-INSERT INTO materias_pertenece_carreras (ID_Materia, ID_Carrera, Fecha_Inicio)
-VALUES 
-    (1, 1, '2024-03-04'),
-    (2, 1, '2024-03-04'),
-    (3, 1, '2024-03-04'),
-    (4, 1, '2024-03-04'),
-    (5, 2, '2024-03-04');
-
--- Alumnos cursan materias
-INSERT INTO alumno_cursa_materias (ID_Persona, ID_Materia, Anio, Cuatrimestre)
-VALUES 
-    (1, 1, 2024, 1),
-    (1, 2, 2024, 1),
-    (2, 1, 2024, 1),
-    (2, 4, 2024, 1);
-
--- Alumnos rinden materias
-INSERT INTO alumno_rinde_materias (ID_Persona, ID_Materia, Fecha_Examen, Nota_Final)
-VALUES 
-    (1, 1, '2024-07-15', 8.50),
-    (2, 1, '2024-07-15', 7.00),
-    (1, 4, '2024-07-20', 9.00);
-
--- Docentes dictan materias
-INSERT INTO docentes_dicta_materias (ID_Persona, ID_Materia, Hora_Clase)
-VALUES 
-    (4, 1, 'Lunes 14:00-18:00'),
-    (4, 2, 'Miércoles 14:00-18:00');
-
--- Docente titular de materias
-INSERT INTO docentes_titular_materias (ID_Persona, ID_Materia, Fecha_Desde)
-VALUES 
-    (4, 1, '2024-03-01'),
-    (4, 2, '2024-03-01');
-
--- Tutorías
-INSERT INTO tutoria (ID_Tutor, ID_Tutorado, Fecha_Inicio)
-VALUES (2, 1, '2024-04-01');
-
-
--- CONSULTAS BÁSICAS --
-
--- Listar todos los docentes 
-SELECT d.ID_Persona, p.Nombre as Nombre_Docente, p.Apellido as Apellido_Docente FROM persona p 
-JOIN docentes d 
-ON  p.ID_Persona= d.ID_Persona   ;
-
--- Listar todos los alumnos con su número de legajo
-SELECT * FROM persona p JOIN alumno a ON p.ID_Persona = a.ID_Persona; 
-
-
-
--- Mostrar todas las carreras con sus fechas de inicio
-SELECT * FROM carreras;
-
---  (Intermedias):
--- Alumnos inscriptos en cada carrera (mostrar nombre alumno y nombre carrera)
-SELECT a.Nro_Legajo as "legajo", p.Nombre as "nombre" , p.Apellido "apellido", c.Nombre_Carrera "carrera" 
-FROM alumno_inscribe_carreras aip 
-INNER JOIN persona p 
-on aip.ID_Persona = p.ID_Persona 
-INNER JOIN alumno a
-on  a.ID_Persona = aip.ID_Persona
-INNER JOIN carreras c
-on c.ID_Carrera = aip.ID_Carrera;
-
--- -- Materias que pertenecen a cada carrera
-Select m.Nombre_Materia, mpc.Fecha_Inicio as "fecha_inicio", c.Nombre_Carrera as 'carrera'
-from materias_pertenece_carreras mpc
-INNER JOIN  materias m
-ON m.ID_Materia = mpc.ID_Materia
-INNER JOIN carreras c
-ON c.ID_Carrera = mpc.ID_Carrera
-ORDER BY c.Nombre_Carrera, m.Nombre_Materia;
-
--- Materias que cursa cada alumno en 2024
- Select  m.Nombre_Materia as "materia", p.Nombre as "nombre", p.Apellido as "apellido"
- from alumno_cursa_materias mcc
- INNER JOIN  materias m
- ON m.ID_Materia = mcc.ID_Materia
- INNER JOIN persona p
- ON p.ID_Persona = mcc.ID_Persona
- ORDER BY m.Nombre_Materia ;
-
--- Notas finales de cada alumno (nombre alumno, materia, nota)
- Select  m.Nombre_Materia as materia, p.Nombre as nombre, p.Apellido as apellido, mrc.Nota_Final as nota
- from alumno_rinde_materias mrc
- INNER JOIN materias m
-	ON m.ID_Materia = mrc.ID_Materia
- INNER JOIN persona p
-	ON p.ID_Persona = mrc.ID_Persona
-ORDER BY p.Apellido, p.Nombre ;
- 
--- Promedio de notas de cada alumno
-Select   p.Nombre as nombre, p.Apellido as apellido , avg(mrc.Nota_Final) as promedio
- from alumno_rinde_materias mrc
- INNER JOIN persona p
-	ON p.ID_Persona = mrc.ID_Persona
-GROUP BY  p.Apellido, p.Nombre 
-ORDER BY p.Apellido ; 
-
--- Cantidad de materias que cursa cada alumno
--- Cantidad de alumnos por carrera
--- Cantidad de alumnos activos vs graduados por carrera
--- Nota más alta y más baja por materia
--- Cantidad de materias que dicta cada docente
--- Alumnos que rindieron más de 2 materias
 
